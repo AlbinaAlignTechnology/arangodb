@@ -48,6 +48,8 @@
 #include "Logger/Logger.h"
 #include "Random/RandomGenerator.h"
 
+#include <boost/filesystem.hpp>
+
 using namespace arangodb::basics;
 using namespace arangodb;
 
@@ -2040,7 +2042,11 @@ static void SystemTempPathCleaner(void) {
   char* path = SystemTempPath.get();
 
   if (path != nullptr) {
-    TRI_RMDIR(path);
+    namespace fs=boost::filesystem;
+    fs::path pathToRemove(path);
+    for (fs::directory_iterator end, it(pathToRemove); it!=end; ++it) {
+      fs::remove_all(it->path());
+    }
   }
 }
 
